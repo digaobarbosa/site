@@ -1,0 +1,97 @@
+{% extends "master.html" %}
+{% block head %}
+    <style type="text/css">
+        .blue{background-color: #003bb3;}
+
+    </style>
+{% endblock %}
+{% block body %}
+
+    {% raw %}
+    <div ng-app="life">
+
+
+    <div class="row-fluid" ng-controller="LifeCtrl">
+        <div class="span2 vertical">
+            <button ng-click="nextStep()" value="proximo" class="btn btn-primary">proximo</button>
+        <button ng-click="start()" value="Iniciar" class="btn btn-success" ng-hide="running">Iniciar</button>
+        <button ng-click="stop()" value="Iniciar" class="btn btn-danger" ng-show="running">Parar</button>
+            {{ running }}
+        </div>
+
+        <table class="table table-bordered span10" >
+        <tbody>
+            <tr ng-repeat="list in matrix">
+                <td ng-repeat="box in matrix[$index]" ng-click="box.value=box.value?0:1" ng-class="cssClass(box)">
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+</div>
+
+
+{% endraw %}
+{% endblock %}
+{% block bottom %}
+<script type="text/javascript">
+    var app = angular.module('life',[]);
+    app.controller('LifeCtrl',function($scope,$timeout){
+        var SIZE=32;
+        var INTERVAL=500;
+        var cell = function(value){return {value:value};};
+        $scope. cssClass = function(box){
+          return box.value==1 ? 'blue':'';
+        };
+        var matrix = new Array(SIZE);
+        for(var i=0;i<SIZE;i++){
+            matrix[i]= new Array(SIZE);
+            for(var j=0;j<SIZE;j++)
+                matrix[i][j] = cell(0);
+        }
+
+        $scope.matrix = matrix;
+        var calculate = function(indexi,indexj){
+            var matrix = $scope.matrix;
+            var sum = 0;
+            for(var i=-1;i<=1;i++){
+                for(var j=-1;j<=1;j++){
+                    var indi = indexi+i;
+                    var indj = indexj+j;
+                    if((i===0 && j===0) ||indi<0 || indj<0 || indi>=SIZE || indj>=SIZE)
+                        continue;
+                    sum+=matrix[indi][indj].value;
+                }
+            }
+            if(matrix[indexi][indexj].value==0)
+                return sum==3 ? cell(1): cell(0);
+            else
+                return sum===2 || sum===3? cell(1): cell(0);
+        };
+
+        $scope.nextStep = function(){
+            var nm = new Array(SIZE);
+            for(var i=0;i<SIZE;i++){
+                nm[i]= new Array(SIZE);
+                for(var j=0;j<SIZE;j++)
+                    nm[i][j] = calculate(i,j);
+            }
+            $scope.matrix = nm;
+
+        };
+        $scope.running = false;
+        $scope.start = function(){
+                $scope.running = true;
+                $scope.ticker = $timeout(function tick(){
+                    $scope.nextStep();
+                    $scope.ticker = $timeout(tick,INTERVAL);
+                },INTERVAL);
+        };
+        $scope.stop = function(){
+            $timeout.cancel($scope.ticker);
+            $scope.running = false;
+        }
+
+    });
+</script>
+{% endblock %}

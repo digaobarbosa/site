@@ -1,0 +1,74 @@
+{% extends "master.html" %}
+{% block body %}
+    <div ng-app="application">
+
+    <div class="row-fluid">
+        <div class="span10 offset2">
+            <h1>Todo List</h1>
+        </div>
+    </div>
+    <div class="row-fluid" ng-controller="EditCtrl">
+        <div class="offset2 span8 well">
+            <label>
+                Nome
+                <input ng-model="edit.name">
+            </label>
+            <label>
+                Descrição
+                <textarea ng-model="edit.description"></textarea>
+            </label>
+            <input type="button" class="btn btn-primary" ng-click="add()" value="Salvar">
+        </div>
+    </div>
+        {% raw %}
+    <div class="row-fluid" ng-controller="ListCtrl">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <td>Id</td>
+                    <td>Nome</td>
+                    <td>Descricao</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="item in list">
+                    <td>{{ item.id }}</td>
+                    <td>{{ item.name}}</td>
+                    <td>{{ item.description}}</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+        {% endraw %}
+    </div>
+{% endblock %}
+{% block bottom %}
+    <script type="text/javascript">
+        var app = angular.module('application',[]);
+        app.factory('todoService',function(){
+            var service = {};
+            service.list = [];
+            service.save = function(item){
+                item.id = service.list.length;
+                service.list.push(item);
+                return item;
+            };
+            return service;
+        });
+        app.controller('EditCtrl',function($scope,todoService){
+            $scope.edit = {};
+            $scope.add = function(){
+                todoService.save($scope.edit);
+                $scope.edit = {}
+            };
+        });
+        app.controller('ListCtrl',function($scope,todoService){
+            $scope.list =  todoService.list;
+        });
+
+
+    </script>
+{% endblock %}
