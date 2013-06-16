@@ -2,6 +2,10 @@
 {% block head %}
     <style type="text/css">
         .blue{background-color: #003bb3;}
+        .red{background-color: #c43c35;}
+        button.blue{color: #003bb3;}
+    button.red{color: #c43c35;}
+
 
     </style>
 {% endblock %}
@@ -16,13 +20,16 @@
             <button ng-click="nextStep()" value="proximo" class="btn btn-primary">proximo</button>
         <button ng-click="start()" value="Iniciar" class="btn btn-success" ng-hide="running">Iniciar</button>
         <button ng-click="stop()" value="Iniciar" class="btn btn-danger" ng-show="running">Parar</button>
-            {{ running }}
+        <button ng-click="changePlayer()" value="Iniciar" class="btn" ng-class="player==1 ? 'blue':'red'">Trocar Player</button>
+        <button ng-click="randomInit()" value="Aleatorio" class="btn" >Aleatorio</button>
+        <input type="number" ng-model="">
+
         </div>
 
         <table class="table table-bordered span10" >
         <tbody>
             <tr ng-repeat="list in matrix">
-                <td ng-repeat="box in matrix[$index]" ng-click="box.value=box.value?0:1" ng-class="cssClass(box)">
+                <td ng-repeat="box in matrix[$index]" ng-click="box.value=box.value?0:player" ng-class="cssClass(box)">
                 </td>
             </tr>
         </tbody>
@@ -37,20 +44,30 @@
 <script type="text/javascript">
     var app = angular.module('life',[]);
     app.controller('LifeCtrl',function($scope,$timeout){
-        var SIZE=32;
-        var INTERVAL=500;
-        var cell = function(value){return {value:value};};
-        $scope. cssClass = function(box){
-          return box.value==1 ? 'blue':'';
-        };
-        var matrix = new Array(SIZE);
-        for(var i=0;i<SIZE;i++){
-            matrix[i]= new Array(SIZE);
-            for(var j=0;j<SIZE;j++)
-                matrix[i][j] = cell(0);
-        }
+        var SIZE=30;
+        var HOR = SIZE;
+        var INTERVAL=100;
+        var cell = function(value){return {value:value>0 ? 1 : value<0 ? -1 : 0};};
+        $scope.cssClass = function(box){
+          if(box.value==1) return 'blue';
+            if(box.value==-1) return 'red';
+            return ''
 
-        $scope.matrix = matrix;
+        };
+
+        var init = function(valFunc){
+                var matrix = new Array(SIZE);
+                for(var i=0;i<SIZE;i++){
+                    matrix[i]= new Array(HOR);
+                    for(var j=0;j<HOR;j++)
+                        if(valFunc)
+                            matrix[i][j] = cell(valFunc(i,j));
+                        else
+                            matrix[i][j] = cell(0);
+                }
+                $scope.matrix = matrix;
+            };
+        init();
         var calculate = function(indexi,indexj){
             var matrix = $scope.matrix;
             var sum = 0;
@@ -63,17 +80,20 @@
                     sum+=matrix[indi][indj].value;
                 }
             }
+            var abs = Math.abs(sum);
+            var keep = [1,2,3,5];
+            var sex = [3];
             if(matrix[indexi][indexj].value==0)
-                return sum==3 ? cell(1): cell(0);
+                return sex.indexOf(abs)!==-1 ? cell(sum): cell(0);
             else
-                return sum===2 || sum===3? cell(1): cell(0);
+                return keep.indexOf(abs)!==-1? cell(sum): cell(0);
         };
 
         $scope.nextStep = function(){
             var nm = new Array(SIZE);
             for(var i=0;i<SIZE;i++){
                 nm[i]= new Array(SIZE);
-                for(var j=0;j<SIZE;j++)
+                for(var j=0;j<HOR;j++)
                     nm[i][j] = calculate(i,j);
             }
             $scope.matrix = nm;
@@ -91,6 +111,19 @@
             $timeout.cancel($scope.ticker);
             $scope.running = false;
         }
+        $scope.player = 1;
+        $scope.changePlayer = function(){
+            $scope.player = $scope.player==1 ? -1 :1;
+        };
+        $scope.randomInit = function(){
+            init(function(){
+                var v = Math.random();
+                if(v<0.3) return -1;
+                if(v<0.6) return 1;
+                return 0;
+            });
+
+        };
 
     });
 </script>
