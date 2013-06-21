@@ -16,16 +16,6 @@
 
 
     <div class="row-fluid" ng-controller="LifeCtrl">
-        <div class="span2 vertical">
-            <button ng-click="nextStep()" value="proximo" class="btn btn-primary">proximo</button>
-        <button ng-click="start()" value="Iniciar" class="btn btn-success" ng-hide="running">Iniciar</button>
-        <button ng-click="stop()" value="Iniciar" class="btn btn-danger" ng-show="running">Parar</button>
-        <button ng-click="changePlayer()" value="Iniciar" class="btn" ng-class="player==1 ? 'blue':'red'">Trocar Player</button>
-        <button ng-click="randomInit()" value="Aleatorio" class="btn" >Aleatorio</button>
-        <input type="number" ng-model="">
-
-        </div>
-
         <table class="table table-bordered span10" >
         <tbody>
             <tr ng-repeat="list in matrix">
@@ -34,6 +24,26 @@
             </tr>
         </tbody>
     </table>
+
+        <div class="span2 vertical">
+            <button ng-click="nextStep()" value="proximo" class="btn btn-primary">proximo</button>
+            <button ng-click="start()" value="Iniciar" class="btn btn-success" ng-hide="running">Iniciar</button>
+            <button ng-click="stop()" value="Iniciar" class="btn btn-danger" ng-show="running">Parar</button>
+            <button ng-click="changePlayer()" value="Iniciar" class="btn" ng-class="player==1 ? 'blue':'red'">Trocar Player</button>
+            <button ng-click="randomInit()" value="Aleatorio" class="btn" >Aleatorio</button>
+            <button ng-click="init()" value="Aleatorio" class="btn" >Iniciar</button>
+            <label>
+                Vertical lines
+                <input type="number" ng-model="VERTICAL" >
+            </label>
+            <label>
+                Horizontal lines
+                <input type="number" ng-model="HORIZONTAL" >
+            </label>
+
+
+
+        </div>
     </div>
 </div>
 
@@ -43,23 +53,29 @@
 {% block bottom %}
 <script type="text/javascript">
     var app = angular.module('life',[]);
-    app.controller('LifeCtrl',function($scope,$timeout){
-        var SIZE=30;
-        var HOR = SIZE;
-        var INTERVAL=100;
-        var cell = function(value){return {value:value>0 ? 1 : value<0 ? -1 : 0};};
-        $scope.cssClass = function(box){
-          if(box.value==1) return 'blue';
-            if(box.value==-1) return 'red';
-            return ''
+    app.service('patternService',function(){
+        this.save = function(name,pattern){
+            localStorage.setItem(name,JSON.stringify(pattern));
+        };
+        this.getAll = function(){
 
         };
+    });
+    app.controller('LifeCtrl',function($scope,$timeout){
+        $scope.VERTICAL = 30;
+        $scope.HORIZONTAL = 30;
+        var INTERVAL=100;
+        var cell = function(value){return {value:value>0 ? 1 : value<0 ? -1 : 0};};
+        var classMap = {"1":'blue',"0":'',"-1":'red'};
+        $scope.cssClass = function(box){
+          return classMap[box.value];
+        };
 
-        var init = function(valFunc){
-                var matrix = new Array(SIZE);
-                for(var i=0;i<SIZE;i++){
-                    matrix[i]= new Array(HOR);
-                    for(var j=0;j<HOR;j++)
+        $scope.init = function(valFunc){
+                var matrix = new Array($scope.VERTICAL);
+                for(var i=0;i<$scope.VERTICAL;i++){
+                    matrix[i]= new Array($scope.HORIZONTAL);
+                    for(var j=0;j<$scope.HORIZONTAL;j++)
                         if(valFunc)
                             matrix[i][j] = cell(valFunc(i,j));
                         else
@@ -67,7 +83,9 @@
                 }
                 $scope.matrix = matrix;
             };
-        init();
+        $scope.init();
+        var keep = {2:1,3:1};
+        var sex = {3:1};
         var calculate = function(indexi,indexj){
             var matrix = $scope.matrix;
             var sum = 0;
@@ -75,28 +93,29 @@
                 for(var j=-1;j<=1;j++){
                     var indi = indexi+i;
                     var indj = indexj+j;
-                    if((i===0 && j===0) ||indi<0 || indj<0 || indi>=SIZE || indj>=SIZE)
+                    if((i===0 && j===0) ||indi<0 || indj<0 || indi>=$scope.VERTICAL || indj>=$scope.HORIZONTAL)
                         continue;
                     sum+=matrix[indi][indj].value;
                 }
             }
             var abs = Math.abs(sum);
-            var keep = [1,2,3,5];
-            var sex = [3];
             if(matrix[indexi][indexj].value==0)
-                return sex.indexOf(abs)!==-1 ? cell(sum): cell(0);
+                return sex[abs] ? cell(sum): cell(0);
             else
-                return keep.indexOf(abs)!==-1? cell(sum): cell(0);
+                return keep[abs]? cell(sum): cell(0);
         };
 
         $scope.nextStep = function(){
-            var nm = new Array(SIZE);
-            for(var i=0;i<SIZE;i++){
-                nm[i]= new Array(SIZE);
-                for(var j=0;j<HOR;j++)
-                    nm[i][j] = calculate(i,j);
+
+            for(var i=0;i<$scope.VERTICAL;i++){
+                for(var j=0;j<$scope.HORIZONTAL;j++)
+                    $scope.matrix[i][j].next = calculate(i,j);
             }
-            $scope.matrix = nm;
+            for(var i=0;i<$scope.VERTICAL;i++){
+                for(var j=0;j<$scope.HORIZONTAL;j++)
+                    $scope.matrix[i][j] = $scope.matrix[i][j].next;
+            }
+
 
         };
         $scope.running = false;
@@ -116,7 +135,7 @@
             $scope.player = $scope.player==1 ? -1 :1;
         };
         $scope.randomInit = function(){
-            init(function(){
+            $scope.init(function(){
                 var v = Math.random();
                 if(v<0.3) return -1;
                 if(v<0.6) return 1;
@@ -124,7 +143,6 @@
             });
 
         };
-
     });
 </script>
 {% endblock %}
