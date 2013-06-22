@@ -1,12 +1,14 @@
 {% extends "master.html" %}
+{% set pageName='home' %}
 {% block body %}
-    <form action="login" method="post" class="well">
-        <label>Login <input name="login"></label>
-        <label>Password<input name="password"></label>
-        <div class="form-actions">
+<div class="span10 offset1 ">
+    <h1>Computer Experiments</h1>
 
-        <input type="submit" class="btn btn-primary">
-        </div>
-    </form>
+    <p class="text-medium">This website is most about some random experiments in computer science. Some cool things as Conway's game of life. Enjoy.</p>
+    <a href="/life" title="Conways game of life">
+        <img src="/static/img/explosive.png" class="text-center">
+    </a>
+    </div>
+
 
 {% endblock %}

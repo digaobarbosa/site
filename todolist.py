@@ -16,6 +16,9 @@ def todoapp():
 @app.route('/life')
 def life():
     return render_template('life.html')
+@app.route('/contact')
+def contact():
+    return render_template('contact.html')
 
 from todolist.models import User
 

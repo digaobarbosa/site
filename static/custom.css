@@ -1,0 +1,27 @@
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Allerta', Helvetica, Arial, sans-serif;
+}
+p, div {
+    font-family: 'Nobile', Helvetica, Arial, sans-serif;
+}
+body {
+    background: url(/static/img/cream_dust.png) repeat 0 0;
+}
+h1 {
+    text-shadow: 1px 1px 1px #ccc;
+}
+.important-box {
+    box-shadow: 0 0 1em 1em #ccc;
+}
+.text-medium{
+    font-size: 20px;
+    line-height: 25px;
+}
+h1{
+    font-size: 50px;
+    line-height: 55px;
+    padding-bottom: 20px;
+}
+.footer{
+    background-color: #b8d3e9;
+}
