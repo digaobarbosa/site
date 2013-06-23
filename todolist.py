@@ -21,7 +21,7 @@ def life():
 def contact():
     return render_template('contact.html')
 
-from todolist.models import User
+
 
 
 
