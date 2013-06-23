@@ -2,6 +2,7 @@ from flask import Flask,render_template
 from flask_login import LoginManager
 
 from database import db_session
+from werkzeug.contrib.fixers import ProxyFix
 app = Flask(__name__)
 
 
@@ -29,6 +30,6 @@ def shutdown_session(exception=None):
     db_session.remove()
 
 
-
+app.wsgi_app = ProxyFix(app.wsgi_app)
 if __name__ == '__main__':
     app.run(debug=True)
